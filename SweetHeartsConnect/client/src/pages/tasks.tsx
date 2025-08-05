@@ -1,11 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { Heart, CheckCircle, Circle } from "lucide-react";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { LoveTask } from "@shared/schema";
@@ -17,8 +14,6 @@ export default function Tasks() {
     queryKey: ["/api/love-tasks"],
   });
 
-
-
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) => {
       return await apiRequest("PATCH", `/api/love-tasks/${id}`, { isCompleted });
@@ -27,8 +22,6 @@ export default function Tasks() {
       queryClient.invalidateQueries({ queryKey: ["/api/love-tasks"] });
     },
   });
-
-
 
   const completedTasks = tasks.filter(task => task.isCompleted).length;
   const totalTasks = tasks.length;
@@ -43,7 +36,6 @@ export default function Tasks() {
       // Celebrate completion
       toast({
         title: "Love Task Completed! 💕",
-        description: "You're making your relationship stronger!",
       });
     }
   };
@@ -165,8 +157,6 @@ export default function Tasks() {
                         </span>
                       )}
                     </div>
-                    
-
                   </div>
                 </CardContent>
               </Card>
