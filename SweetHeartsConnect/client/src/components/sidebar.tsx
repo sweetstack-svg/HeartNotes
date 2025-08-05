@@ -50,12 +50,12 @@ export function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile hamburger button */}
+      {/* Menu toggle button */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onToggle}
-        className="fixed top-4 left-4 z-50 lg:hidden text-gray-600 dark:text-pink-300 hover:text-pink-600 dark:hover:text-pink-400"
+        className="fixed top-4 left-4 z-50 text-gray-600 dark:text-pink-300 hover:text-pink-600 dark:hover:text-pink-400"
       >
         <Menu className="h-6 w-6" />
       </Button>
