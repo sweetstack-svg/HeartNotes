@@ -18,24 +18,27 @@ export default function Hugs() {
 
   // Initialize hug count and check for daily reset
   useEffect(() => {
-    const today = new Date().toDateString();
-    const storedDate = localStorage.getItem('hugCountDate');
-    const storedCount = localStorage.getItem('hugCount');
-    
-    if (storedDate === today && storedCount) {
-      // Same day, load existing count
-      setHugCount(parseInt(storedCount, 10));
-    } else {
-      // New day or first time, reset count
-      setHugCount(0);
-      localStorage.setItem('hugCountDate', today);
-      localStorage.setItem('hugCount', '0');
+    // Check if window is defined (client-side)
+    if (typeof window !== 'undefined') {
+      const today = new Date().toDateString();
+      const storedDate = localStorage.getItem('hugCountDate');
+      const storedCount = localStorage.getItem('hugCount');
+      
+      if (storedDate === today && storedCount) {
+        // Same day, load existing count
+        setHugCount(parseInt(storedCount, 10));
+      } else {
+        // New day or first time, reset count
+        setHugCount(0);
+        localStorage.setItem('hugCountDate', today);
+        localStorage.setItem('hugCount', '0');
+      }
     }
   }, []);
 
   // Save hug count to localStorage whenever it changes
   useEffect(() => {
-    if (hugCount > 0) {
+    if (hugCount > 0 && typeof window !== 'undefined') {
       localStorage.setItem('hugCount', hugCount.toString());
     }
   }, [hugCount]);
