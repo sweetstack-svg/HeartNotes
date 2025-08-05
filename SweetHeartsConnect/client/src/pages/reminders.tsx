@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { Bell, Plus, Check, X } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -34,27 +34,7 @@ export default function Reminders() {
     },
   });
 
-  const updateReminderMutation = useMutation({
-    mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) => {
-      return await apiRequest("PATCH", `/api/reminders/${id}`, { isCompleted });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/reminders"] });
-    },
-  });
 
-  const deleteReminderMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiRequest("DELETE", `/api/reminders/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/reminders"] });
-      toast({
-        title: "Reminder Deleted",
-        description: "The reminder has been removed.",
-      });
-    },
-  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +42,7 @@ export default function Reminders() {
     createReminderMutation.mutate(newReminder);
   };
 
-  const handleToggleComplete = (id: string, isCompleted: boolean) => {
-    updateReminderMutation.mutate({ id, isCompleted: !isCompleted });
-  };
 
-  const handleDelete = (id: string) => {
-    deleteReminderMutation.mutate(id);
-  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -128,40 +102,11 @@ export default function Reminders() {
               }`}>
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleToggleComplete(reminder.id, reminder.isCompleted)}
-                      className={`mt-1 ${
-                        reminder.isCompleted 
-                          ? "text-green-500 hover:text-green-600" 
-                          : "text-gray-400 hover:text-pink-500"
-                      }`}
-                    >
-                      {reminder.isCompleted ? (
-                        <Check className="h-5 w-5" />
-                      ) : (
-                        <div className="w-5 h-5 border-2 border-current rounded-full" />
-                      )}
-                    </Button>
-                    
                     <div className="flex-1">
-                      <h3 className={`font-semibold text-gray-800 dark:text-pink-200 ${
-                        reminder.isCompleted ? "line-through" : ""
-                      }`}>
+                      <h3 className="font-semibold text-gray-800 dark:text-pink-200">
                         {reminder.title}
                       </h3>
-
                     </div>
-                    
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(reminder.id)}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -172,3 +117,4 @@ export default function Reminders() {
     </div>
   );
 }
+
