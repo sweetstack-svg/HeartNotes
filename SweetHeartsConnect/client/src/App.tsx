@@ -39,8 +39,10 @@ function AppLayout() {
 
       {/* Main Content */}
       <div className="flex-1 relative z-10 lg:ml-64">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <Router />
+        <div className="w-full flex justify-center px-4 py-6">
+          <div className="w-full max-w-4xl">
+            <Router />
+          </div>
         </div>
       </div>
     </div>
@@ -61,3 +63,4 @@ function App() {
 }
 
 export default App;
+
