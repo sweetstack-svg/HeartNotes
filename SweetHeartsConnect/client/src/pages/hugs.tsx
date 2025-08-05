@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const hugTypes = [
   { id: 'warm', emoji: '🫂', name: 'Warm Hug', color: 'from-orange-400 to-red-500' },
@@ -14,64 +14,88 @@ const hugTypes = [
 export default function Hugs() {
   const [animationElements, setAnimationElements] = useState<Array<{ id: string; x: number; y: number; emoji: string; delay: number; animationType: string }>>([]);
   const [showBackgroundEffect, setShowBackgroundEffect] = useState(false);
+  const [hugCount, setHugCount] = useState(0);
+
+  // Initialize hug count and check for daily reset
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const storedDate = localStorage.getItem('hugCountDate');
+    const storedCount = localStorage.getItem('hugCount');
+    
+    if (storedDate === today && storedCount) {
+      // Same day, load existing count
+      setHugCount(parseInt(storedCount, 10));
+    } else {
+      // New day or first time, reset count
+      setHugCount(0);
+      localStorage.setItem('hugCountDate', today);
+      localStorage.setItem('hugCount', '0');
+    }
+  }, []);
+
+  // Save hug count to localStorage whenever it changes
+  useEffect(() => {
+    if (hugCount > 0) {
+      localStorage.setItem('hugCount', hugCount.toString());
+    }
+  }, [hugCount]);
 
   const triggerHugAnimation = (hugType: typeof hugTypes[0]) => {
-    // Create multiple waves of animations for spectacular effect
-    const hugEmojis = [hugType.emoji, '💕', '💖', '✨', '🌟', '💝', '🎉', '🌈', '💫', '🦋'];
+    // Create a lively but smooth animation with more elements
+    const hugEmojis = [hugType.emoji, '💕', '💖', '✨', '🌟', '💝'];
     
-    // First wave - center explosion (reduced from 15 to 8)
+    // Center burst with more elements
     const centerElements = Array.from({ length: 8 }, (_, i) => ({
       id: `center-${Date.now()}-${i}`,
-      x: 45 + Math.random() * 10, // Center area
+      x: 45 + Math.random() * 10,
       y: 45 + Math.random() * 10,
       emoji: hugEmojis[Math.floor(Math.random() * hugEmojis.length)],
-      delay: Math.random() * 0.5,
+      delay: Math.random() * 0.4,
       animationType: 'center'
     }));
 
-    // Second wave - spiraling effect (reduced from 20 to 10)
-    const spiralElements = Array.from({ length: 10 }, (_, i) => {
-      const angle = (i / 10) * 2 * Math.PI;
-      const radius = 30 + Math.random() * 20;
+    // Floating hearts from corners
+    const floatingElements = Array.from({ length: 6 }, (_, i) => {
+      const positions = [
+        { x: 10, y: 10 }, { x: 90, y: 10 }, { x: 10, y: 90 },
+        { x: 90, y: 90 }, { x: 50, y: 10 }, { x: 50, y: 90 }
+      ];
       return {
-        id: `spiral-${Date.now()}-${i}`,
-        x: 50 + Math.cos(angle) * radius,
-        y: 50 + Math.sin(angle) * radius,
+        id: `floating-${Date.now()}-${i}`,
+        x: positions[i].x,
+        y: positions[i].y,
         emoji: hugEmojis[Math.floor(Math.random() * hugEmojis.length)],
-        delay: 0.5 + (i * 0.1),
-        animationType: 'spiral'
+        delay: 0.5 + (i * 0.15),
+        animationType: 'floating'
       };
     });
 
-    // Third wave - corners to center (reduced from 12 to 4)
-    const cornerElements = Array.from({ length: 4 }, (_, i) => ({
-      id: `corner-${Date.now()}-${i}`,
-      x: i < 1 ? 5 : i < 2 ? 95 : i < 3 ? 5 : 95,
-      y: i < 1 ? 5 : i < 2 ? 5 : i < 3 ? 95 : 95,
-      emoji: hugEmojis[Math.floor(Math.random() * hugEmojis.length)],
-      delay: 1 + Math.random() * 0.5,
-      animationType: 'corner'
-    }));
+    // Add gentle side elements for more coverage
+    const sideElements = Array.from({ length: 4 }, (_, i) => {
+      const positions = [
+        { x: 5, y: 50 }, { x: 95, y: 50 },
+        { x: 25, y: 25 }, { x: 75, y: 75 }
+      ];
+      return {
+        id: `side-${Date.now()}-${i}`,
+        x: positions[i].x,
+        y: positions[i].y,
+        emoji: hugEmojis[Math.floor(Math.random() * hugEmojis.length)],
+        delay: 0.8 + (i * 0.1),
+        animationType: 'floating'
+      };
+    });
 
-    // Fourth wave - falling from top (reduced from 15 to 3)
-    const fallingElements = Array.from({ length: 3 }, (_, i) => ({
-      id: `falling-${Date.now()}-${i}`,
-      x: 20 + (i * 30), // More spaced out
-      y: -10,
-      emoji: hugEmojis[Math.floor(Math.random() * hugEmojis.length)],
-      delay: 1.5 + (i * 0.3),
-      animationType: 'falling'
-    }));
-
-    const allElements = [...centerElements, ...spiralElements, ...cornerElements, ...fallingElements];
+    const allElements = [...centerElements, ...floatingElements, ...sideElements];
     setAnimationElements(allElements);
     setShowBackgroundEffect(true);
+    setHugCount(prev => prev + 1);
     
-    // Clean up animation after 4 seconds (reduced for better performance)
+    // Clean up animation after 5 seconds
     setTimeout(() => {
       setAnimationElements([]);
       setShowBackgroundEffect(false);
-    }, 4000);
+    }, 5000);
   };
 
   return (
@@ -121,51 +145,24 @@ export default function Hugs() {
                 initial: { opacity: 0, scale: 0 },
                 animate: { 
                   opacity: [0, 1, 1, 0], 
-                  scale: [0, 2, 1.5, 0],
-                  rotate: [0, 360, 720],
-                  x: [-50, 50, -30, 20, 0],
-                  y: [-50, 30, -20, 40, 0]
+                  scale: [0, 1.3, 1.1, 0],
+                  rotate: [0, 180],
+                  y: [0, -20, 0, 20]
                 },
-                transition: { duration: 4, delay: element.delay, ease: "easeOut" }
+                transition: { duration: 2.5, delay: element.delay, ease: "easeOut" }
               };
               break;
-            case 'spiral':
-              animationConfig = {
-                initial: { opacity: 0, scale: 0, rotate: 0 },
-                animate: { 
-                  opacity: [0, 1, 1, 0], 
-                  scale: [0, 1.5, 1, 0],
-                  rotate: [0, 720, 1080],
-                  x: [0, Math.cos(element.delay * 10) * 100],
-                  y: [0, Math.sin(element.delay * 10) * 100]
-                },
-                transition: { duration: 5, delay: element.delay, ease: "easeInOut" }
-              };
-              break;
-            case 'corner':
+            case 'floating':
               animationConfig = {
                 initial: { opacity: 0, scale: 0 },
                 animate: { 
                   opacity: [0, 1, 1, 0], 
-                  scale: [0, 1.8, 1.2, 0],
-                  x: [0, (50 - element.x) * 0.8, (50 - element.x) * 0.4, 0],
-                  y: [0, (50 - element.y) * 0.8, (50 - element.y) * 0.4, 0],
-                  rotate: [0, 180, 360]
+                  scale: [0, 1.2, 1, 0],
+                  x: [0, (50 - element.x) * 0.3],
+                  y: [0, (50 - element.y) * 0.3],
+                  rotate: [0, 90]
                 },
-                transition: { duration: 3.5, delay: element.delay, ease: "easeOut" }
-              };
-              break;
-            case 'falling':
-              animationConfig = {
-                initial: { opacity: 0, scale: 0, y: -100 },
-                animate: { 
-                  opacity: [0, 1, 1, 0], 
-                  scale: [0, 1.3, 1, 0.8],
-                  y: [0, window.innerHeight + 100],
-                  rotate: [0, 180, 360],
-                  x: [0, Math.sin(element.delay * 5) * 50]
-                },
-                transition: { duration: 4, delay: element.delay, ease: "easeIn" }
+                transition: { duration: 2.8, delay: element.delay, ease: "easeInOut" }
               };
               break;
             default:
@@ -173,10 +170,10 @@ export default function Hugs() {
                 initial: { opacity: 0, scale: 0 },
                 animate: { 
                   opacity: [0, 1, 1, 0], 
-                  scale: [0, 1.5, 1, 0],
-                  rotate: [0, 360]
+                  scale: [0, 1.2, 1, 0],
+                  rotate: [0, 180]
                 },
-                transition: { duration: 3, delay: element.delay, ease: "easeOut" }
+                transition: { duration: 2.5, delay: element.delay, ease: "easeOut" }
               };
           }
 
@@ -280,6 +277,89 @@ export default function Hugs() {
             </Button>
           </motion.div>
         ))}
+      </motion.div>
+
+      {/* Hug Count Display */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-8"
+      >
+        <div className="glass-effect dark:glass-effect-dark shadow-xl rounded-2xl p-6 border border-pink-200 dark:border-pink-700">
+          <div className="text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-4xl"
+              >
+                🫂
+              </motion.div>
+              <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400" style={{ fontFamily: "cursive" }}>
+                Hugs Sent
+              </h3>
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, -5, 5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1
+                }}
+                className="text-4xl"
+              >
+                💕
+              </motion.div>
+            </div>
+            
+            <div className="relative">
+              <motion.div
+                key={hugCount}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", damping: 15, stiffness: 300 }}
+                className="text-6xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-2"
+              >
+                {hugCount}
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-gray-600 dark:text-pink-300 text-lg"
+              >
+                Hug Count
+              </motion.div>
+            </div>
+            
+            {/* Milestone celebrations */}
+            {hugCount > 0 && hugCount % 5 === 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                className="mt-4 flex items-center justify-center space-x-2"
+              >
+                <span className="text-2xl">🎉</span>
+                <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
+                  Milestone reached!
+                </span>
+                <span className="text-2xl">🎉</span>
+              </motion.div>
+            )}
+          </div>
+        </div>
       </motion.div>
     </div>
   );
