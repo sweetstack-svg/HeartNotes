@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => {
           // Ensure consistent chunk naming for better caching
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: 'assets/[ext]/[name]-[hash][ext]',
+          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
         },
       },
       // Minify for production
